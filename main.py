@@ -1,10 +1,11 @@
 import pandas as pd
 from os import path
-from gurobipy import Model, GRB
+from gurobipy import Model, GRB, quicksum
 import gurobipy as gp
 
 ## encontrar J e I
 BASE_CSV = "./csv"
+M = 10000
 RUTAS = {
     "F_i": path.join(BASE_CSV, "costo_fijo.csv"),
     "c_j": path.join(BASE_CSV, "costo_material.csv"),
@@ -27,8 +28,8 @@ def cargar_datos():
 
     N = pd.read_csv(RUTAS["N"],index_col=None,header=None)[0][0]
     W = pd.read_csv(RUTAS["W"],index_col=None,header=None)[0][0]
-    I = len(F_i)
-    J = len(c_j)
+    I = range(len(F_i))
+    J = range(len(c_j))
     data ={
     "F_i":F_i ,
     "c_j": c_j,
@@ -38,7 +39,9 @@ def cargar_datos():
     "a_ij": a_ij,
     "N": N,
     "W": W,
-    "P_i": P_i
+    "P_i": P_i,
+    "I": I,
+    "J": J
     }
 
     return data
@@ -53,13 +56,62 @@ def cargar_datos():
 def construir_modelo(data):
     I = data["I"]
     J = data["J"]
-
+    a_ij = data["a_ij"]
+    b_j = data["b_j"]
+    P_i = data["P_i"]
+    c_j = data["c_j"]
+    W = data["W"]
+    N = data["N"]
+    r_i = data["r_i"]
+    rho_i = data["rho_i"]
+    F_i = data["F_i"]
+    ### SETUP INICIAL ###
     model = gp.Model() # crea modelo
+
+    # Agregamos variables
     x_i = model.addVars(I,lb=0.0, vtype=GRB.CONTINUOUS, name="x_i")
-    y_j = model.addvars(J, lb=0.0, vtype=GRB.CONTINUOUS, name="y_j")
+    y_j = model.addVars(J, lb=0.0, vtype=GRB.CONTINUOUS, name="y_j")
     w_i = model.addVars(I,vtype=GRB.BINARY, name="w_i")
 
+    model.update() # actualizamos el modelo
+
+    ### RESTRICCIONES ###
+    model.addConstrs(
+        ((x_i[i] <= M*w_i[i]) for i in I),
+        name="R1: activacion de la binaria"
+    )
+
+    model.addConstrs(
+        (quicksum(a_ij[i][j] for i in I) <= b_j[j] + y_j[j]  for j in J),
+        name="R2: disponibilidad de materiales"
+    )
+
+    # model.addConstrs(
+    #     (w_i[i] + w_i[k] <= 1  for i in I for k in P_i[i]),
+    #     name="R3: compatibilidad de producion de productos"
+    # )
+
+    model.addConstr(
+        (quicksum(y_j[j]*c_j[j] for j in J) <= W),
+        name= "R4: respetar el presupuesto total para comprar materiales"
+    )
+
+    model.addConstr(
+        (quicksum(w_i[i] for i in I) <= N),
+        name="R5: Limite de cantidad de productos distintos producidos"
+    )
+
+    model.setObjective(
+        (quicksum((r_i[i] - rho_i[i])*x_i[i] - F_i[i]*w_i[i] for i in I ) - quicksum(y_j[j]*c_j[j] for j in J)),
+        GRB.MAXIMIZE
+    )
+    
+
     model.update()
+    return model
+
+
+
     """
     Esta función debe construir el modelo de optimización utilizando Gurobi
     y los datos provistos en el diccionario `data`.
@@ -67,6 +119,8 @@ def construir_modelo(data):
     raise NotImplementedError("Implementa esta función para construir el modelo.")
 
 def resolver_modelo(model):
+
+
     """
     Esta función debe llamar al solver de Gurobi para resolver el modelo.
     """
@@ -74,6 +128,24 @@ def resolver_modelo(model):
     return model
 
 def imprimir_resultados(model):
+
+
+    if model.status == GRB.INFEASIBLE:
+        print('El modelo es infactible')
+        model.computeIIS()
+        model.write('modelo.ilp')
+        return None
+
+    elif model.status == GRB.UNBOUNDED:
+        print('El modelo es no acotado')
+        return None
+
+    elif model.status == GRB.INF_OR_UNBD:
+        print('El modelo es infactible o no acotado')
+        return None
+    
+    else:
+        return model.ObjVal
     """
     Esta función debe imprimir de forma clara el valor óptimo (con su unidad)
     y la cantidad de productos producidos de cada tipo.
