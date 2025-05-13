@@ -2,8 +2,20 @@ import pandas as pd
 from os import path
 from gurobipy import Model, GRB
 import gurobipy as gp
+
 ## encontrar J e I
-RUTA_CSV = "./csv/"
+BASE_CSV = "./csv"
+RUTAS = {
+    "F_i": path.join(BASE_CSV, "costo_fijo.csv"),
+    "c_j": path.join(BASE_CSV, "costo_material.csv"),
+    "rho_i": path.join(BASE_CSV, "costo_variable.csv"),
+    "r_i": path.join(BASE_CSV, "ingreso_por_unidad.csv"),
+    "b_j": path.join(BASE_CSV, "material_disponible.csv"),
+    "a_ij": path.join(BASE_CSV, "material_requerido.csv"),
+    "N": path.join(BASE_CSV, "maximo_productos.csv"),
+    "W": path.join(BASE_CSV, "presupuesto_materiales.csv"),
+    "P_i": path.join(BASE_CSV, "productos_prohibidos.csv"),
+}
 def cargar_datos():
     data ={
 
@@ -16,10 +28,10 @@ def cargar_datos():
     raise NotImplementedError("Implementa esta función para cargar los datos.")
 
 def construir_modelo(data):
-    model = gp.Model() # crea modelo
     I = data["I"]
     J = data["J"]
 
+    model = gp.Model() # crea modelo
     x_i = model.addVars(I,lb=0.0, vtype=GRB.CONTINUOUS, name="x_i")
     y_j = model.addvars(J, lb=0.0, vtype=GRB.CONTINUOUS, name="y_j")
     w_i = model.addVars(I,vtype=GRB.BINARY, name="w_i")
