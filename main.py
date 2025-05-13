@@ -17,9 +17,23 @@ RUTAS = {
     "P_i": path.join(BASE_CSV, "productos_prohibidos.csv"),
 }
 def cargar_datos():
+    F_i = pd.read_csv(RUTAS["F_i"],index_col=None,header=None)[0].tolist()
+    c_j = pd.read_csv(RUTAS["c_j"],index_col=None,header=None)[0].tolist()
+    rho_i = pd.read_csv(RUTAS["rho_i"],index_col=None,header=None)[0].tolist()
+    r_i = pd.read_csv(RUTAS["r_i"],index_col=None,header=None)[0].tolist()
+    b_j = pd.read_csv(RUTAS["b_j"],index_col=None,header=None)[0].tolist()
+    # a_ij = pd.read_csv(RUTAS["a_ij"],index_col=None,header=None)[0].tolist()
+    P_i = pd.read_csv(RUTAS["P_i"],index_col=None,header=None)[0].tolist()
+
+    I = len(F_i)
+    J = len(c_j)
     data ={
 
     }
+
+
+
+
     """
     Esta función debe leer los 9 archivos .csv de la instancia y devolver
     un diccionario con todos los parámetros necesarios para construir el modelo.
