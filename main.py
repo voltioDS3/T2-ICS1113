@@ -22,17 +22,26 @@ def cargar_datos():
     rho_i = pd.read_csv(RUTAS["rho_i"],index_col=None,header=None)[0].tolist()
     r_i = pd.read_csv(RUTAS["r_i"],index_col=None,header=None)[0].tolist()
     b_j = pd.read_csv(RUTAS["b_j"],index_col=None,header=None)[0].tolist()
-    # a_ij = pd.read_csv(RUTAS["a_ij"],index_col=None,header=None)[0].tolist()
+    a_ij = pd.read_csv(RUTAS["a_ij"],index_col=None,header=None).T
     P_i = pd.read_csv(RUTAS["P_i"],index_col=None,header=None)[0].tolist()
 
+    N = pd.read_csv(RUTAS["N"],index_col=None,header=None)[0][0]
+    W = pd.read_csv(RUTAS["W"],index_col=None,header=None)[0][0]
     I = len(F_i)
     J = len(c_j)
     data ={
-
+    "F_i":F_i ,
+    "c_j": c_j,
+    "rho_i":rho_i ,
+    "r_i": r_i,
+    "b_j": b_j,
+    "a_ij": a_ij,
+    "N": N,
+    "W": W,
+    "P_i": P_i
     }
 
-
-
+    return data
 
     """
     Esta función debe leer los 9 archivos .csv de la instancia y devolver
