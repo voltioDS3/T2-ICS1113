@@ -8,7 +8,8 @@ Para activar el entorno virtual en Windows, ejecuta el siguiente comando en la t
 
 ```bash
 .\gurobi-env\Scripts\activate
-
-Para activar el entorno en Mac, ejecutar el siguiente comando el la terminal:
+```
+Para activarlo en mac correr el siguiente codigo en la raiz:
 ```bash
 source gurobi-env/bin/activate
+```
