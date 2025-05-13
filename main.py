@@ -17,6 +17,14 @@ RUTAS = {
     "W": path.join(BASE_CSV, "presupuesto_materiales.csv"),
     "P_i": path.join(BASE_CSV, "productos_prohibidos.csv"),
 }
+
+def parse_list(cell):
+    # si está vacío, lista vacía
+    if cell.strip() == "":
+        return []
+    # split por coma, quito espacios y convierto a int
+    return [int(x.strip()) for x in cell.split(",")]
+
 def cargar_datos():
     F_i = pd.read_csv(RUTAS["F_i"],index_col=None,header=None)[0].tolist()
     c_j = pd.read_csv(RUTAS["c_j"],index_col=None,header=None)[0].tolist()
@@ -24,12 +32,23 @@ def cargar_datos():
     r_i = pd.read_csv(RUTAS["r_i"],index_col=None,header=None)[0].tolist()
     b_j = pd.read_csv(RUTAS["b_j"],index_col=None,header=None)[0].tolist()
     a_ij = pd.read_csv(RUTAS["a_ij"],index_col=None,header=None).T
-    P_i = pd.read_csv(RUTAS["P_i"],index_col=None,header=None)[0].tolist()
-
+    P_i = pd.read_csv(
+    RUTAS["P_i"],
+    header=None,
+    names=["raw"],
+    dtype=str,           
+    skip_blank_lines=False 
+)
+    P_i["raw"] = P_i["raw"].fillna("")
+    P_i["P_i_list"] = P_i["raw"].apply(parse_list)
+    P_i = P_i["P_i_list"]
     N = pd.read_csv(RUTAS["N"],index_col=None,header=None)[0][0]
     W = pd.read_csv(RUTAS["W"],index_col=None,header=None)[0][0]
     I = range(len(F_i))
     J = range(len(c_j))
+
+
+    
     data ={
     "F_i":F_i ,
     "c_j": c_j,
@@ -86,10 +105,10 @@ def construir_modelo(data):
         name="R2: disponibilidad de materiales"
     )
 
-    # model.addConstrs(
-    #     (w_i[i] + w_i[k] <= 1  for i in I for k in P_i[i]),
-    #     name="R3: compatibilidad de producion de productos"
-    # )
+    model.addConstrs(
+        (w_i[i] + w_i[k] <= 1  for i in I for k in P_i[i]),
+        name="R3: compatibilidad de producion de productos"
+    )
 
     model.addConstr(
         (quicksum(y_j[j]*c_j[j] for j in J) <= W),
