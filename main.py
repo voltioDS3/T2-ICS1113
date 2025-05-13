@@ -145,6 +145,17 @@ def imprimir_resultados(model):
         return None
     
     else:
+        for var in model.getVars():
+            if "x_i" in var.VarName and var.X > 1e-6:
+                print(f"{var.VarName}: {var.X:.2f}")
+        for var in model.getVars():
+            if "y_j" in var.VarName and var.X > 1e-6:
+                print(f"{var.VarName}: {var.X:.2f}")
+        
+        for var in model.getVars():
+            if "w_i" in var.VarName and var.X > 0.5:
+                print(f"{var.VarName}: {int(var.X)}")
+
         return model.ObjVal
     """
     Esta función debe imprimir de forma clara el valor óptimo (con su unidad)
