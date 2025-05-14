@@ -106,7 +106,7 @@ def construir_modelo(data):
     )
 
     model.addConstrs(
-        (w_i[i] + w_i[k] <= 1  for i in I for k in P_i[i]),
+        (w_i[i] + w_i[k-1] <= 1  for i in I for k in P_i[i]),
         name="R3: compatibilidad de producion de productos"
     )
 
