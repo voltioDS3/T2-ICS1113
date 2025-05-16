@@ -164,17 +164,24 @@ def imprimir_resultados(model):
         return None
     
     else:
-        for var in model.getVars():
+        for var in sorted(model.getVars(), key=lambda v: v.VarName):
             if "x_i" in var.VarName and var.X > 1e-6:
-                print(f"{var.VarName}: {var.X:.2f}")
-        for var in model.getVars():
-            if "y_j" in var.VarName and var.X > 1e-6:
-                print(f"{var.VarName}: {var.X:.2f}")
-        
-        for var in model.getVars():
-            if "w_i" in var.VarName and var.X > 0.5:
-                print(f"{var.VarName}: {int(var.X)}")
+                idx = int(var.VarName.split("[")[1].split("]")[0])
+                print(f"x_i[{idx + 1}]: {var.X:.2f}")
 
+        print("\nResultados de y_j (ítem real):")
+        for var in sorted(model.getVars(), key=lambda v: v.VarName):
+            if "y_j" in var.VarName and var.X > 1e-6:
+                idx = int(var.VarName.split("[")[1].split("]")[0])
+                print(f"y_j[{idx + 1}]: {var.X:.2f}")
+
+        print("\nResultados de w_i (ítem real):")
+        for var in sorted(model.getVars(), key=lambda v: v.VarName):
+            if "w_i" in var.VarName and var.X > 0.5:
+                idx = int(var.VarName.split("[")[1].split("]")[0])
+                print(f"w_i[{idx + 1}]: {int(var.X)}")
+
+        print(f"\nValor objetivo: {model.ObjVal:.2f}")
         return model.ObjVal
     """
     Esta función debe imprimir de forma clara el valor óptimo (con su unidad)
