@@ -4,7 +4,7 @@ from gurobipy import Model, GRB, quicksum
 import gurobipy as gp
 
 ## encontrar J e I
-BASE_CSV = "./csv"
+BASE_CSV = "./"
 M = 10000
 RUTAS = {
     "F_i": path.join(BASE_CSV, "costo_fijo.csv"),
@@ -164,18 +164,19 @@ def imprimir_resultados(model):
         return None
     
     else:
+        print("\nUnidades producidas de x_i (item real):")
         for var in sorted(model.getVars(), key=lambda v: v.VarName):
             if "x_i" in var.VarName and var.X > 1e-6:
                 idx = int(var.VarName.split("[")[1].split("]")[0])
                 print(f"x_i[{idx + 1}]: {var.X:.2f}")
 
-        print("\nResultados de y_j (item real):")
+        print("\nMateriales y_j (item real):")
         for var in sorted(model.getVars(), key=lambda v: v.VarName):
             if "y_j" in var.VarName and var.X > 1e-6:
                 idx = int(var.VarName.split("[")[1].split("]")[0])
                 print(f"y_j[{idx + 1}]: {var.X:.2f}")
 
-        print("\nResultados de w_i (item real):")
+        print("\nBinaria w_i (item real):")
         for var in sorted(model.getVars(), key=lambda v: v.VarName):
             if "w_i" in var.VarName and var.X > 0.5:
                 idx = int(var.VarName.split("[")[1].split("]")[0])
