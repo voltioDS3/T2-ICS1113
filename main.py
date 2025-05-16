@@ -47,7 +47,7 @@ def cargar_datos():
     I = range(len(F_i))
     J = range(len(c_j))
 
-
+    
     
     data ={
     "F_i":F_i ,
@@ -62,7 +62,7 @@ def cargar_datos():
     "I": I,
     "J": J
     }
-
+    print(data)
     return data
 
     """
@@ -93,7 +93,7 @@ def construir_modelo(data):
     w_i = model.addVars(I,vtype=GRB.BINARY, name="w_i")
 
     model.update() # actualizamos el modelo
-
+    M =100000000
     ### RESTRICCIONES ###
     model.addConstrs(
         ((x_i[i] <= M*w_i[i]) for i in I),
@@ -101,7 +101,7 @@ def construir_modelo(data):
     )
 
     model.addConstrs(
-        (quicksum(a_ij[i][j] for i in I) <= b_j[j] + y_j[j]  for j in J),
+        (quicksum(a_ij[i][j]*x_i[i] for i in I) <= b_j[j] + y_j[j]  for j in J),
         name="R2: disponibilidad de materiales"
     )
 
@@ -169,13 +169,13 @@ def imprimir_resultados(model):
                 idx = int(var.VarName.split("[")[1].split("]")[0])
                 print(f"x_i[{idx + 1}]: {var.X:.2f}")
 
-        print("\nResultados de y_j (ítem real):")
+        print("\nResultados de y_j (item real):")
         for var in sorted(model.getVars(), key=lambda v: v.VarName):
             if "y_j" in var.VarName and var.X > 1e-6:
                 idx = int(var.VarName.split("[")[1].split("]")[0])
                 print(f"y_j[{idx + 1}]: {var.X:.2f}")
 
-        print("\nResultados de w_i (ítem real):")
+        print("\nResultados de w_i (item real):")
         for var in sorted(model.getVars(), key=lambda v: v.VarName):
             if "w_i" in var.VarName and var.X > 0.5:
                 idx = int(var.VarName.split("[")[1].split("]")[0])
